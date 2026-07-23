@@ -1,0 +1,46 @@
+[build-system]
+requires = ["hatchling>=1.26"]
+build-backend = "hatchling.build"
+
+[project]
+name = "dcc-mcp-tracy"
+version = "0.1.0"
+description = "Tracy frame profiler capture and analysis automation for DCC-MCP"
+readme = "README.md"
+requires-python = ">=3.9"
+license = { text = "MIT" }
+authors = [{ name = "loonghao", email = "hal.long@outlook.com" }]
+keywords = ["tracy", "profiler", "mcp", "game-development", "performance"]
+dependencies = ["dcc-mcp-core>=0.19.38,<1.0.0"]
+
+[project.optional-dependencies]
+dev = ["build>=1.2", "pytest>=8", "ruff>=0.8", "twine>=6"]
+
+[project.urls]
+Homepage = "https://github.com/dcc-mcp/dcc-mcp-tracy"
+Repository = "https://github.com/dcc-mcp/dcc-mcp-tracy"
+Issues = "https://github.com/dcc-mcp/dcc-mcp-tracy/issues"
+
+[project.scripts]
+dcc-mcp-tracy = "dcc_mcp_tracy.server:main"
+
+[project.entry-points."dcc_mcp.adapters"]
+tracy = "dcc_mcp_tracy:TracyMcpServer"
+
+[tool.hatch.build.targets.wheel]
+packages = ["src/dcc_mcp_tracy"]
+artifacts = ["src/dcc_mcp_tracy/skills/**"]
+
+[tool.hatch.build.targets.sdist]
+include = ["src/dcc_mcp_tracy", "tests", "README.md", "LICENSE", "CHANGELOG.md", "tools"]
+
+[tool.pytest.ini_options]
+testpaths = ["tests"]
+pythonpath = ["src", "."]
+
+[tool.ruff]
+target-version = "py39"
+line-length = 100
+
+[tool.ruff.lint]
+select = ["E", "F", "I", "B"]
