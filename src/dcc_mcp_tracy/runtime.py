@@ -3,15 +3,94 @@
 from __future__ import annotations
 
 import csv
+import hashlib
+import json
 import os
 import shutil
 import subprocess
+import tempfile
+import urllib.request
+import zipfile
 from pathlib import Path
 from typing import Any, Optional, Sequence
 
 
 class TracyError(RuntimeError):
     """Raised when a Tracy operation cannot satisfy its contract."""
+
+
+TRACY_RELEASES_URL = "https://api.github.com/repos/wolfpld/tracy/releases/latest"
+
+
+def _runtime_cache() -> Path:
+    configured = os.environ.get("DCC_MCP_RUNTIME_CACHE")
+    if configured:
+        return Path(configured).expanduser().resolve() / "tracy"
+    if os.name == "nt":
+        root = Path(os.environ.get("LOCALAPPDATA", Path.home() / "AppData/Local"))
+    else:
+        root = Path(os.environ.get("XDG_CACHE_HOME", Path.home() / ".cache"))
+    return root / "dcc-mcp" / "tracy"
+
+
+def _safe_extract(archive: Path, destination: Path) -> None:
+    root = destination.resolve()
+    with zipfile.ZipFile(archive) as bundle:
+        for member in bundle.infolist():
+            target = (destination / member.filename).resolve()
+            if target != root and root not in target.parents:
+                raise TracyError(f"Tracy archive contains unsafe path: {member.filename}")
+        bundle.extractall(destination)
+
+
+def _download_latest_capture() -> Path:
+    if os.name != "nt":
+        raise TracyError(
+            "Tracy automatic download currently supports Windows releases; "
+            "set DCC_MCP_TRACY_CAPTURE on Linux/macOS"
+        )
+    request = urllib.request.Request(
+        TRACY_RELEASES_URL,
+        headers={"Accept": "application/vnd.github+json", "User-Agent": "dcc-mcp-tracy"},
+    )
+    try:
+        with urllib.request.urlopen(request, timeout=30) as response:
+            release = json.load(response)
+    except OSError as exc:
+        raise TracyError(f"Could not query Tracy releases: {exc}") from exc
+    assets = [item for item in release.get("assets", []) if item.get("name", "").endswith(".zip")]
+    if len(assets) != 1:
+        raise TracyError(f"Expected one Tracy Windows release archive, found {len(assets)}")
+    asset = assets[0]
+    version_dir = _runtime_cache() / release["tag_name"]
+    command = version_dir / "capture.exe"
+    if not command.is_file():
+        if version_dir.exists():
+            command = next(version_dir.rglob("capture.exe"), command)
+    if command.is_file():
+        return command.resolve()
+    version_dir.mkdir(parents=True, exist_ok=True)
+    with tempfile.NamedTemporaryFile(suffix=".zip", delete=False) as handle:
+        archive = Path(handle.name)
+    try:
+        with urllib.request.urlopen(asset["browser_download_url"], timeout=120) as response, archive.open(
+            "wb"
+        ) as stream:
+            shutil.copyfileobj(response, stream)
+        expected = asset.get("digest", "")
+        if expected.startswith("sha256:"):
+            actual = hashlib.sha256(archive.read_bytes()).hexdigest()
+            if actual != expected.removeprefix("sha256:"):
+                raise TracyError("Downloaded Tracy archive SHA256 does not match GitHub metadata")
+        _safe_extract(archive, version_dir)
+    except (OSError, KeyError, ValueError) as exc:
+        raise TracyError(f"Could not download Tracy: {exc}") from exc
+    finally:
+        archive.unlink(missing_ok=True)
+    command = next(version_dir.rglob("capture.exe"), None)
+    if command is None:
+        raise TracyError("Downloaded Tracy archive did not contain capture.exe")
+    return command.resolve()
 
 
 def _resolve(explicit: Optional[str], env_name: str, names: Sequence[str], label: str) -> Path:
@@ -29,21 +108,37 @@ def _resolve(explicit: Optional[str], env_name: str, names: Sequence[str], label
 
 
 def resolve_capture(explicit: Optional[str] = None) -> Path:
-    return _resolve(
-        explicit,
-        "DCC_MCP_TRACY_CAPTURE",
-        ("tracy-capture.exe", "tracy-capture", "capture"),
-        "Tracy capture utility",
-    )
+    try:
+        return _resolve(
+            explicit,
+            "DCC_MCP_TRACY_CAPTURE",
+            ("tracy-capture.exe", "tracy-capture", "capture"),
+            "Tracy capture utility",
+        )
+    except TracyError:
+        if os.environ.get("DCC_MCP_TRACY_AUTO_DOWNLOAD", "1").lower() in {"0", "false", "no"}:
+            raise
+        return _download_latest_capture()
 
 
 def resolve_csvexport(explicit: Optional[str] = None) -> Path:
-    return _resolve(
-        explicit,
-        "DCC_MCP_TRACY_CSVEXPORT",
-        ("tracy-csvexport.exe", "tracy-csvexport", "csvexport"),
-        "Tracy CSV exporter",
-    )
+    try:
+        return _resolve(
+            explicit,
+            "DCC_MCP_TRACY_CSVEXPORT",
+            ("tracy-csvexport.exe", "tracy-csvexport", "csvexport"),
+            "Tracy CSV exporter",
+        )
+    except TracyError:
+        if os.environ.get("DCC_MCP_TRACY_AUTO_DOWNLOAD", "1").lower() in {"0", "false", "no"}:
+            raise
+        capture = _download_latest_capture()
+        sibling = next(capture.parent.rglob("csvexport.exe"), None)
+        if sibling is None:
+            sibling = next(capture.parents[1].rglob("csvexport.exe"), None)
+        if sibling is None:
+            raise TracyError("Downloaded Tracy archive did not contain csvexport.exe") from None
+        return sibling.resolve()
 
 
 def _run(

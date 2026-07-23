@@ -10,7 +10,7 @@ Tracy is a client/server profiler: the target must be built with Tracy instrumen
 pip install dcc-mcp-tracy
 ```
 
-Install Tracy separately and set `DCC_MCP_TRACY_CAPTURE` and `DCC_MCP_TRACY_CSVEXPORT`, or put the utilities on `PATH`.
+Install Tracy separately and set `DCC_MCP_TRACY_CAPTURE` and `DCC_MCP_TRACY_CSVEXPORT`, or put the utilities on `PATH`. On Windows, if neither is available, the adapter downloads and caches the official latest Tracy release automatically. Set `DCC_MCP_TRACY_AUTO_DOWNLOAD=0` to require a local installation; use `DCC_MCP_RUNTIME_CACHE` to choose the cache root. Linux/macOS currently require explicit Tracy binaries because the official release does not ship those desktop bundles.
 
 ## Workflow
 
