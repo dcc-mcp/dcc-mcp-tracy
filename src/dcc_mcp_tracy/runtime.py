@@ -73,9 +73,8 @@ def _download_latest_capture() -> Path:
     with tempfile.NamedTemporaryFile(suffix=".zip", delete=False) as handle:
         archive = Path(handle.name)
     try:
-        with urllib.request.urlopen(asset["browser_download_url"], timeout=120) as response, archive.open(
-            "wb"
-        ) as stream:
+        download = urllib.request.urlopen(asset["browser_download_url"], timeout=120)
+        with download as response, archive.open("wb") as stream:
             shutil.copyfileobj(response, stream)
         expected = asset.get("digest", "")
         if expected.startswith("sha256:"):
