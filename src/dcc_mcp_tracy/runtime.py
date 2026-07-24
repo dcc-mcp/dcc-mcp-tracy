@@ -9,6 +9,7 @@ import os
 import shutil
 import subprocess
 import tempfile
+import time
 import urllib.request
 import zipfile
 from pathlib import Path
@@ -22,6 +23,7 @@ class TracyError(RuntimeError):
 TRACY_RELEASES_URL = "https://api.github.com/repos/wolfpld/tracy/releases/latest"
 _DOWNLOADED_CAPTURE_NAMES = ("tracy-capture.exe", "capture.exe")
 _DOWNLOADED_CSVEXPORT_NAMES = ("tracy-csvexport.exe", "csvexport.exe")
+_CACHE_TTL_SECONDS = 24 * 60 * 60
 
 
 def _runtime_cache() -> Path:
@@ -53,12 +55,23 @@ def _find_downloaded_tool(root: Path, names: Sequence[str]) -> Optional[Path]:
     return None
 
 
+def _find_newest_downloaded_tool(root: Path, names: Sequence[str]) -> Optional[Path]:
+    candidates = [path for name in names for path in root.rglob(name)]
+    if not candidates:
+        return None
+    return max(candidates, key=lambda path: path.parent.stat().st_mtime).resolve()
+
+
 def _download_latest_capture() -> Path:
     if os.name != "nt":
         raise TracyError(
             "Tracy automatic download currently supports Windows releases; "
             "set DCC_MCP_TRACY_CAPTURE on Linux/macOS"
         )
+    cache_root = _runtime_cache()
+    cached = _find_newest_downloaded_tool(cache_root, _DOWNLOADED_CAPTURE_NAMES)
+    if cached is not None and time.time() - cached.parent.stat().st_mtime < _CACHE_TTL_SECONDS:
+        return cached
     request = urllib.request.Request(
         TRACY_RELEASES_URL,
         headers={"Accept": "application/vnd.github+json", "User-Agent": "dcc-mcp-tracy"},
@@ -67,14 +80,17 @@ def _download_latest_capture() -> Path:
         with urllib.request.urlopen(request, timeout=30) as response:
             release = json.load(response)
     except OSError as exc:
+        if cached is not None:
+            return cached
         raise TracyError(f"Could not query Tracy releases: {exc}") from exc
     assets = [item for item in release.get("assets", []) if item.get("name", "").endswith(".zip")]
     if len(assets) != 1:
         raise TracyError(f"Expected one Tracy Windows release archive, found {len(assets)}")
     asset = assets[0]
-    version_dir = _runtime_cache() / release["tag_name"]
+    version_dir = cache_root / release["tag_name"]
     command = _find_downloaded_tool(version_dir, _DOWNLOADED_CAPTURE_NAMES)
     if command is not None:
+        version_dir.touch()
         return command
     version_dir.mkdir(parents=True, exist_ok=True)
     with tempfile.NamedTemporaryFile(suffix=".zip", delete=False) as handle:
