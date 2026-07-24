@@ -9,7 +9,7 @@ metadata:
   dcc-mcp:
     dcc: tracy
     layer: domain
-    version: "0.1.0"
+    version: "0.2.2"  # x-release-please-version
     search-hint: "Tracy profiler CSV zone statistics performance triage"
     tags: "tracy,profiling,performance,diagnostics"
     tools: tools.yaml

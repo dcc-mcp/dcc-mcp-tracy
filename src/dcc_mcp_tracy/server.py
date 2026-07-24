@@ -2,12 +2,13 @@
 
 from __future__ import annotations
 
+import argparse
 import os
 import signal
 import sys
 import threading
 from pathlib import Path
-from typing import Optional
+from typing import Optional, Sequence
 
 from dcc_mcp_core import DccServerOptions
 from dcc_mcp_core.server_base import DccServerBase
@@ -57,7 +58,10 @@ def stop_server() -> None:
         _server = None
 
 
-def main() -> None:
+def main(argv: Optional[Sequence[str]] = None) -> None:
+    parser = argparse.ArgumentParser(description="Run the standalone Tracy MCP server.")
+    parser.add_argument("--version", action="version", version=f"%(prog)s {__version__}")
+    parser.parse_args(argv)
     stopped = threading.Event()
     signal.signal(signal.SIGINT, lambda *_: stopped.set())
     if hasattr(signal, "SIGTERM"):
