@@ -1,5 +1,12 @@
 # Changelog
 
+## [0.2.3](https://github.com/dcc-mcp/dcc-mcp-tracy/compare/v0.2.2...v0.2.3) (2026-07-24)
+
+
+### Bug Fixes
+
+* make Tracy CLI probes side-effect free ([#6](https://github.com/dcc-mcp/dcc-mcp-tracy/issues/6)) ([882b47c](https://github.com/dcc-mcp/dcc-mcp-tracy/commit/882b47cf234a4a573ca2567fed94b122c8e0f3f3))
+
 ## [0.2.2](https://github.com/dcc-mcp/dcc-mcp-tracy/compare/v0.2.1...v0.2.2) (2026-07-24)
 
 
