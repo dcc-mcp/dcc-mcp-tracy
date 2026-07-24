@@ -1,5 +1,12 @@
 # Changelog
 
+## [0.2.2](https://github.com/dcc-mcp/dcc-mcp-tracy/compare/v0.2.1...v0.2.2) (2026-07-24)
+
+
+### Bug Fixes
+
+* reuse cached Tracy runtime ([#4](https://github.com/dcc-mcp/dcc-mcp-tracy/issues/4)) ([7825452](https://github.com/dcc-mcp/dcc-mcp-tracy/commit/782545223d210ff3d54a1bab6d45b4622ce3cbc3))
+
 ## [0.2.1](https://github.com/dcc-mcp/dcc-mcp-tracy/compare/v0.2.0...v0.2.1) (2026-07-24)
 
 
