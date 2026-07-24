@@ -53,9 +53,7 @@ def test_auto_download_accepts_prefixed_runtime_names(
             ],
         }
     ).encode()
-    responses = iter(
-        (io.BytesIO(release_bytes), io.BytesIO(archive_bytes), io.BytesIO(release_bytes))
-    )
+    responses = iter((io.BytesIO(release_bytes), io.BytesIO(archive_bytes)))
     monkeypatch.setattr(runtime, "os", SimpleNamespace(name="nt", environ=os.environ))
     monkeypatch.setattr(runtime, "_runtime_cache", lambda: tmp_path / "tracy")
     monkeypatch.setattr(runtime.shutil, "which", lambda _name: None)
