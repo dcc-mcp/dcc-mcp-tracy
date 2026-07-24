@@ -20,6 +20,8 @@ class TracyError(RuntimeError):
 
 
 TRACY_RELEASES_URL = "https://api.github.com/repos/wolfpld/tracy/releases/latest"
+_DOWNLOADED_CAPTURE_NAMES = ("tracy-capture.exe", "capture.exe")
+_DOWNLOADED_CSVEXPORT_NAMES = ("tracy-csvexport.exe", "csvexport.exe")
 
 
 def _runtime_cache() -> Path:
@@ -43,6 +45,14 @@ def _safe_extract(archive: Path, destination: Path) -> None:
         bundle.extractall(destination)
 
 
+def _find_downloaded_tool(root: Path, names: Sequence[str]) -> Optional[Path]:
+    for name in names:
+        command = next(root.rglob(name), None)
+        if command is not None:
+            return command.resolve()
+    return None
+
+
 def _download_latest_capture() -> Path:
     if os.name != "nt":
         raise TracyError(
@@ -63,12 +73,9 @@ def _download_latest_capture() -> Path:
         raise TracyError(f"Expected one Tracy Windows release archive, found {len(assets)}")
     asset = assets[0]
     version_dir = _runtime_cache() / release["tag_name"]
-    command = version_dir / "capture.exe"
-    if not command.is_file():
-        if version_dir.exists():
-            command = next(version_dir.rglob("capture.exe"), command)
-    if command.is_file():
-        return command.resolve()
+    command = _find_downloaded_tool(version_dir, _DOWNLOADED_CAPTURE_NAMES)
+    if command is not None:
+        return command
     version_dir.mkdir(parents=True, exist_ok=True)
     with tempfile.NamedTemporaryFile(suffix=".zip", delete=False) as handle:
         archive = Path(handle.name)
@@ -86,10 +93,10 @@ def _download_latest_capture() -> Path:
         raise TracyError(f"Could not download Tracy: {exc}") from exc
     finally:
         archive.unlink(missing_ok=True)
-    command = next(version_dir.rglob("capture.exe"), None)
+    command = _find_downloaded_tool(version_dir, _DOWNLOADED_CAPTURE_NAMES)
     if command is None:
-        raise TracyError("Downloaded Tracy archive did not contain capture.exe")
-    return command.resolve()
+        raise TracyError("Downloaded Tracy archive did not contain a Tracy capture executable")
+    return command
 
 
 def _resolve(explicit: Optional[str], env_name: str, names: Sequence[str], label: str) -> Path:
@@ -132,16 +139,19 @@ def resolve_csvexport(explicit: Optional[str] = None) -> Path:
         if os.environ.get("DCC_MCP_TRACY_AUTO_DOWNLOAD", "1").lower() in {"0", "false", "no"}:
             raise
         capture = _download_latest_capture()
-        sibling = next(capture.parent.rglob("csvexport.exe"), None)
+        sibling = _find_downloaded_tool(capture.parent, _DOWNLOADED_CSVEXPORT_NAMES)
         if sibling is None:
-            sibling = next(capture.parents[1].rglob("csvexport.exe"), None)
-        if sibling is None:
-            raise TracyError("Downloaded Tracy archive did not contain csvexport.exe") from None
-        return sibling.resolve()
+            raise TracyError(
+                "Downloaded Tracy archive did not contain a Tracy CSV exporter"
+            ) from None
+        return sibling
 
 
 def _run(
-    executable: Path, arguments: Sequence[str], timeout_secs: int
+    executable: Path,
+    arguments: Sequence[str],
+    timeout_secs: int,
+    allowed_returncodes: Sequence[int] = (0,),
 ) -> subprocess.CompletedProcess[str]:
     try:
         result = subprocess.run(
@@ -152,7 +162,7 @@ def _run(
         raise TracyError(f"Tracy command timed out after {timeout_secs}s") from exc
     except OSError as exc:
         raise TracyError(f"Could not start Tracy command: {exc}") from exc
-    if result.returncode != 0:
+    if result.returncode not in allowed_returncodes:
         detail = (result.stderr or result.stdout or "unknown error").strip()[-2000:]
         raise TracyError(f"Tracy exited with code {result.returncode}: {detail}")
     return result
@@ -160,8 +170,10 @@ def _run(
 
 def get_version(*, capture_command: Optional[str] = None) -> dict[str, Any]:
     executable = resolve_capture(capture_command)
-    result = _run(executable, ["-h"], 30)
+    result = _run(executable, ["-h"], 30, allowed_returncodes=(0, 1))
     output = "\n".join(part.strip() for part in (result.stdout, result.stderr) if part.strip())
+    if not output:
+        raise TracyError("Tracy capture utility did not report help or version information")
     return {"command": str(executable), "version_output": output}
 
 
