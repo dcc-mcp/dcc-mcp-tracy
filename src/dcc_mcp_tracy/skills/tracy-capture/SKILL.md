@@ -10,7 +10,7 @@ metadata:
   dcc-mcp:
     dcc: tracy
     layer: domain
-    version: "0.1.0"
+    version: "0.2.2"  # x-release-please-version
     search-hint: "Tracy profiler capture trace game performance"
     tags: "tracy,profiling,performance,game-development"
     tools: tools.yaml
