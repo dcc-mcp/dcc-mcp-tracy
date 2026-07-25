@@ -41,3 +41,19 @@ def test_runtime_and_skill_versions_match_distribution() -> None:
     for skill in ("tracy-capture", "tracy-analysis"):
         text = (skills / skill / "SKILL.md").read_text(encoding="utf-8")
         assert re.search(rf'^    version: "{re.escape(expected)}"', text, re.MULTILINE)
+
+
+@pytest.mark.parametrize(
+    ("skill_name", "expected_tools"),
+    [
+        ("tracy-capture", {"get_version", "capture_trace"}),
+        ("tracy-analysis", {"export_csv", "summarize_csv"}),
+    ],
+)
+def test_bundled_skill_tools_load_with_current_core(skill_name, expected_tools) -> None:
+    from dcc_mcp_core import parse_skill_md
+
+    skills = Path(__file__).parents[1] / "src" / "dcc_mcp_tracy" / "skills"
+    metadata = parse_skill_md(str(skills / skill_name))
+
+    assert expected_tools == {tool.name for tool in metadata.tools}
