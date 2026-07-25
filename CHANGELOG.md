@@ -1,5 +1,13 @@
 # Changelog
 
+## [0.2.4](https://github.com/dcc-mcp/dcc-mcp-tracy/compare/v0.2.3...v0.2.4) (2026-07-25)
+
+
+### Bug Fixes
+
+* ignore core call metadata in Tracy wrappers ([#10](https://github.com/dcc-mcp/dcc-mcp-tracy/issues/10)) ([327b97b](https://github.com/dcc-mcp/dcc-mcp-tracy/commit/327b97b97163d78f5c210d7a6389baea64554cff))
+* update Tracy skill chaining contract ([#8](https://github.com/dcc-mcp/dcc-mcp-tracy/issues/8)) ([99d986b](https://github.com/dcc-mcp/dcc-mcp-tracy/commit/99d986bb7e9bca8de94064a42f524898d3e60497))
+
 ## [0.2.3](https://github.com/dcc-mcp/dcc-mcp-tracy/compare/v0.2.2...v0.2.3) (2026-07-24)
 
 
