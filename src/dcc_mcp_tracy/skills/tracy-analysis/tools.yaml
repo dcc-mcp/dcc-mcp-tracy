@@ -18,7 +18,11 @@ tools:
     affinity: any
     timeout_hint_secs: 300
     source_file: scripts/export_csv.py
-    next-tools: [tracy_analysis__summarize_csv]
+    next-tools:
+      on-success:
+        - tracy_analysis__summarize_csv
+      on-failure:
+        - dcc_diagnostics__audit_log
   - name: summarize_csv
     description: Summarize exported Tracy zone statistics and return the highest standard-deviation zones.
     input_schema:
