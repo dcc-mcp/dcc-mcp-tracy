@@ -1,5 +1,13 @@
 # Changelog
 
+## [0.2.5](https://github.com/dcc-mcp/dcc-mcp-tracy/compare/v0.2.4...v0.2.5) (2026-07-26)
+
+
+### Bug Fixes
+
+* rely on Core metadata filtering ([d7082d0](https://github.com/dcc-mcp/dcc-mcp-tracy/commit/d7082d0716fbd2f973161ba4a7d2bc9a72db8b19))
+* rely on Core metadata filtering ([24227a6](https://github.com/dcc-mcp/dcc-mcp-tracy/commit/24227a61566d6c02301e65f8ef90981c384d7f31))
+
 ## [0.2.4](https://github.com/dcc-mcp/dcc-mcp-tracy/compare/v0.2.3...v0.2.4) (2026-07-25)
 
 
