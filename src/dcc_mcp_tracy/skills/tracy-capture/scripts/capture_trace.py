@@ -5,7 +5,6 @@ from dcc_mcp_tracy.runtime import capture_trace
 
 @skill_entry
 def main(output_file: str, **kwargs):
-    kwargs.pop("_meta", None)
     result = capture_trace(output_file, **kwargs)
     return skill_success("Tracy trace captured.", **result)
 

@@ -5,7 +5,6 @@ from dcc_mcp_tracy.runtime import export_csv
 
 @skill_entry
 def main(trace_file: str, output_file: str, **kwargs):
-    kwargs.pop("_meta", None)
     result = export_csv(trace_file, output_file, **kwargs)
     return skill_success("Tracy zone statistics exported.", **result)
 
