@@ -171,8 +171,14 @@ def _run(
 ) -> subprocess.CompletedProcess[str]:
     try:
         result = subprocess.run(
-            [str(executable), *arguments], capture_output=True, text=True, shell=False,
-            timeout=timeout_secs, check=False,
+            [str(executable), *arguments],
+            capture_output=True,
+            text=True,
+            shell=False,
+            timeout=timeout_secs,
+            check=False,
+            stdin=subprocess.DEVNULL,
+            creationflags=subprocess.CREATE_NO_WINDOW if os.name == "nt" else 0,
         )
     except subprocess.TimeoutExpired as exc:
         raise TracyError(f"Tracy command timed out after {timeout_secs}s") from exc

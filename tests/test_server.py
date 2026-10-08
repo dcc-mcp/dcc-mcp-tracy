@@ -9,6 +9,12 @@ import pytest
 from dcc_mcp_tracy import server
 
 
+def test_standalone_service_publishes_explicit_identity(monkeypatch):
+    monkeypatch.setattr(server, "get_version", lambda: {"version_output": "test"})
+    instance = server.TracyMcpServer(port=0)
+    assert instance._config.instance_metadata["dcc_mcp_instance_type"] == "standalone"
+
+
 def test_help_exits_without_starting_server(monkeypatch, capsys) -> None:
     started = []
     monkeypatch.setattr(server, "start_server", lambda: started.append(True))

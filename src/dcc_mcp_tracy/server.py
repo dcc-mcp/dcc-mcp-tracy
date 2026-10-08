@@ -31,6 +31,7 @@ class TracyMcpServer(DccServerBase):
             port=port,
             server_name="dcc-mcp-tracy",
             server_version=__version__,
+            instance_type="standalone",
         )
         super().__init__(options=options)
 
