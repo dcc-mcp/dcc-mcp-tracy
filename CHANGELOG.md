@@ -1,5 +1,12 @@
 # Changelog
 
+## [0.2.6](https://github.com/dcc-mcp/dcc-mcp-tracy/compare/v0.2.5...v0.2.6) (2026-10-09)
+
+
+### Bug Fixes
+
+* hide background commands and declare standalone identity ([#14](https://github.com/dcc-mcp/dcc-mcp-tracy/issues/14)) ([4474dc3](https://github.com/dcc-mcp/dcc-mcp-tracy/commit/4474dc32d123fc0c93dc775670215bc9ffc294e2))
+
 ## [0.2.5](https://github.com/dcc-mcp/dcc-mcp-tracy/compare/v0.2.4...v0.2.5) (2026-07-26)
 
 
