@@ -2,6 +2,7 @@ import hashlib
 import io
 import json
 import os
+import sys
 import zipfile
 from pathlib import Path
 from types import SimpleNamespace
@@ -10,6 +11,27 @@ import pytest
 
 from dcc_mcp_tracy import runtime
 from dcc_mcp_tracy.runtime import TracyError, resolve_capture, summarize_csv
+
+
+@pytest.mark.skipif(os.name != "nt", reason="Windows console contract")
+def test_background_command_has_no_console_and_separate_diagnostics():
+    code = (
+        "import ctypes,json,sys; "
+        "print(json.dumps({'console':ctypes.windll.kernel32.GetConsoleWindow(),'result':6*7})); "
+        "print('tracy diagnostic',file=sys.stderr)"
+    )
+    result = runtime._run(Path(sys.executable), ["-c", code], 10)
+    assert json.loads(result.stdout) == {"console": 0, "result": 42}
+    assert result.stderr.strip() == "tracy diagnostic"
+
+
+def test_command_failure_retains_stderr():
+    with pytest.raises(TracyError, match="code 7: tracy failure"):
+        runtime._run(
+            Path(sys.executable),
+            ["-c", "import sys; print('tracy failure',file=sys.stderr);sys.exit(7)"],
+            10,
+        )
 
 
 def test_summarize_csv_orders_zones(tmp_path: Path) -> None:
