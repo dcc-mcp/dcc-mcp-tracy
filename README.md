@@ -4,6 +4,26 @@ Tracy frame-profiler capture and offline zone analysis for DCC-MCP.
 
 Tracy is a client/server profiler: the target must be built with Tracy instrumentation (C/C++, Rust, C#, Python, or another supported binding). This adapter controls the official `tracy-capture` and `tracy-csvexport` utilities; it does not inject Tracy into an uninstrumented process.
 
+<!-- dcc-mcp-coverage-pointer:start -->
+<!-- Generated from dcc-mcp-catalog.yml by scripts/generate_adapter_pointer.py in dcc-mcp/dcc-mcp-core. Do not edit by hand. -->
+## Part of the DCC-MCP host matrix
+
+**dcc-mcp-tracy** — Tracy profiler adapter for DCC-MCP — capture instrumented
+applications, export trace CSV data and analyze zone timing.
+
+It is one of **47 host adapters** in the DCC-MCP catalog. Every adapter speaks the same
+MCP protocol and builds on the same core runtime contract; each one exposes the tools
+its own host needs on top of that.
+
+- [All host adapters and install metadata](https://dcc-mcp.github.io/ecosystem)
+- [Host matrix on the core README](https://github.com/dcc-mcp/dcc-mcp-core#readme)
+- [Showcase](https://dcc-mcp.github.io/showcase)
+
+This block is generated from the catalog entry in
+[`dcc-mcp-catalog.yml`](https://github.com/dcc-mcp/dcc-mcp-core/blob/main/dcc-mcp-catalog.yml).
+Re-run the generator after changing the catalog.
+<!-- dcc-mcp-coverage-pointer:end -->
+
 ## Install
 
 ```bash
