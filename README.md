@@ -11,7 +11,7 @@ Tracy is a client/server profiler: the target must be built with Tracy instrumen
 **dcc-mcp-tracy** — Tracy profiler adapter for DCC-MCP — capture instrumented
 applications, export trace CSV data and analyze zone timing.
 
-It is one of **47 host adapters** in the DCC-MCP catalog. Every adapter speaks the same
+It is one of **48 host adapters** in the DCC-MCP catalog. Every adapter speaks the same
 MCP protocol and builds on the same core runtime contract; each one exposes the tools
 its own host needs on top of that.
 
