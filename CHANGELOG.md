@@ -1,5 +1,13 @@
 # Changelog
 
+## [0.2.8](https://github.com/dcc-mcp/dcc-mcp-tracy/compare/v0.2.7...v0.2.8) (2026-11-24)
+
+
+### Documentation
+
+* refresh the generated DCC-MCP host matrix pointer ([6798401](https://github.com/dcc-mcp/dcc-mcp-tracy/commit/67984017dee5ec6da9f5d4cac56a1adc703e0655))
+* refresh the generated DCC-MCP host matrix pointer ([bb3247e](https://github.com/dcc-mcp/dcc-mcp-tracy/commit/bb3247ef4a93ad9a4319aba59e7dbc487b47b72a))
+
 ## [0.2.7](https://github.com/dcc-mcp/dcc-mcp-tracy/compare/v0.2.6...v0.2.7) (2026-10-17)
 
 
